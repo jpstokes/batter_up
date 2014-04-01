@@ -1,32 +1,81 @@
 require 'spec_helper'
 require_relative '../models/player.rb'
 
-describe 'player' do
+describe Player do
   before { @player = FactoryGirl.create(:player) }
 
   describe '#new' do
     it { expect(@player).to be_a_kind_of Player }
   end
 
-  describe '#find_players_by_at_bat' do
-    context 'user with at_bat less than 200' do
-      before { FactoryGirl.create(:statistic, :at_bat => 199) }
-      it 'equals 0' do
-        expect(Player.find_players_by_at_bat(200).count).to eq(0)
+  describe '#find_players_by_at_bat_and_period' do
+
+    context 'when player is within period' do
+      context 'when player with at_bat less than 200' do
+        before { FactoryGirl.create(:statistic, :at_bat => 199) }
+        it 'equals 0' do
+          expect(Player.find_players_by_at_bat_and_period(200, 2000, 2014).count).to eq(0)
+        end
+      end
+
+      context 'when player with at_bat of 200' do
+        before { FactoryGirl.create(:statistic, :at_bat => 200) }
+        it 'equals 1' do
+          expect(Player.find_players_by_at_bat_and_period(200, 2000, 2014).count).to eq(1)
+        end
+      end
+
+      context 'when player with at_bat over 200' do
+        before { FactoryGirl.create(:statistic, :at_bat => 201) }
+        it 'equals 1' do
+          expect(Player.find_players_by_at_bat_and_period(200, 2000, 2014).count).to eq(1)
+        end
+      end
+
+      context 'when adding mulitple statistics' do
+        before do
+          FactoryGirl.create(:player, :first_name => 'Jackie', :player_id => 2)
+          FactoryGirl.create(:statistic, :at_bat => 20)
+          FactoryGirl.create(:statistic, :at_bat => 30)
+          FactoryGirl.create(:statistic, :at_bat => 50)
+          FactoryGirl.create(:statistic, :at_bat => 40)
+          FactoryGirl.create(:statistic, :at_bat => 60)
+
+          FactoryGirl.create(:statistic, :player_id => 2, :at_bat => 40)
+          FactoryGirl.create(:statistic, :player_id => 2, :at_bat => 60)
+        end
+
+        context 'when player at_bat adds up to 100' do
+          it 'equals 2' do
+            expect(Player.find_players_by_at_bat_and_period(100, 2000, 2014).count).to eq(2)
+          end
+
+          it 'returns the correct users' do
+            expect(Player.find_players_by_at_bat_and_period(100, 2000, 2014).map(&:first_name)).to include('john', 'Jackie')
+          end
+        end
+
+        context 'when player at_bat adds up to 200' do
+          it 'equals 1' do
+            expect(Player.find_players_by_at_bat_and_period(200, 2000, 2014).count).to eq(1)
+          end
+
+          it 'returns the correct user' do
+            expect(Player.find_players_by_at_bat_and_period(200, 2000, 2014).first.first_name).to eq('john')
+          end
+        end
+
+        context 'when player at_bat adds up to 300' do
+          it 'equals 1' do
+            expect(Player.find_players_by_at_bat_and_period(300, 2000, 2014).count).to eq(0)
+          end
+        end
       end
     end
 
-    context 'user with at_bat of 200' do
-      before { FactoryGirl.create(:statistic, :at_bat => 200) }
-      it 'equals 1' do
-        expect(Player.find_players_by_at_bat(200).count).to eq(1)
-      end
-    end
-
-    context 'user with at_bat over 200' do
-      before { FactoryGirl.create(:statistic, :at_bat => 201) }
-      it 'equals 1' do
-        expect(Player.find_players_by_at_bat(200).count).to eq(1)
+    context 'when player is not within range' do
+      it 'it does not show player' do
+        expect(Player.find_players_by_at_bat_and_period(100, 2000, 2011).count).to eq(0)
       end
     end
   end
@@ -68,7 +117,7 @@ describe 'player' do
     end
 
     it 'returns correct value' do
-      expect(@player.batting_average(2000, 2002)).to eq(5.0/20.0)
+      expect(@player.batting_average(2000, 2002)).to eq(5.0 / 20.0)
     end
   end
 
@@ -156,7 +205,7 @@ describe 'player' do
   end
 
   describe "#played_in_league?" do
-      before { FactoryGirl.create(:statistic, :league => 'AL', :year_id => 2012) }
+    before { FactoryGirl.create(:statistic, :league => 'AL', :year_id => 2012) }
     it { expect(@player.played_in_league?('AL', 2012)).to be_true }
   end
 

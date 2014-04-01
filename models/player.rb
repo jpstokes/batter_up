@@ -1,7 +1,8 @@
 class Player < ActiveRecord::Base
 
-  def self.find_players_by_at_bat(number_of_at_bats)
-    player_ids = Statistic.where('at_bat >= ?', number_of_at_bats).map(&:player_id).uniq
+  def self.find_players_by_at_bat_and_period(number_of_at_bats, from, to)
+    player_ids = Statistic.where("year_id BETWEEN ? AND ?", from, to).having("sum(at_bat) >= ?", number_of_at_bats)
+      .group(:player_id).sum(:at_bat).map { |stat| stat[0] }
     Player.where(:player_id => player_ids)
   end
 
@@ -54,7 +55,8 @@ class Player < ActiveRecord::Base
     stats = find_statistics(from, to)
     hits = stats.sum('hits')
     at_bat = stats.sum('at_bat')
-    hits / at_bat.to_f
+    result = hits / at_bat.to_f
+    result.nan? ? 0.0 : result
   end
 
   def slugging_percentage(from, to)
@@ -64,7 +66,8 @@ class Player < ActiveRecord::Base
     triples = stats.sum(:triples)
     home_runs = stats.sum(:home_runs)
     at_bat = stats.sum(:at_bat)
-    ((hits - doubles - triples - home_runs) + (2 * doubles) + (3 * triples) + (4 * home_runs)) / at_bat.to_f
+    result = ((hits - doubles - triples - home_runs) + (2 * doubles) + (3 * triples) + (4 * home_runs)) / at_bat.to_f
+    result.nan? ? 0.0 : result
   end
 
   def played_in_league?(league, year)

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../models/statistic.rb'
 
-describe 'statistic' do
+describe Statistic do
   let(:statistic) { FactoryGirl.build(:statistic) }
 
   describe '#new' do

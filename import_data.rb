@@ -1,6 +1,6 @@
-file_path = "data/Master-small.csv"
+file_path = 'data/Master-small.csv'
 
-CSV.foreach(file_path, :headers => true) do |row|
+CSV.foreach(file_path, headers: true) do |row|
   player = Player.new
   player.player_id = row[0]
   player.birth_year = row[1]
@@ -9,9 +9,9 @@ CSV.foreach(file_path, :headers => true) do |row|
   player.save
 end
 
-file_path = "data/Batting-07-12.csv"
+file_path = 'data/Batting-07-12.csv'
 
-CSV.foreach(file_path, :headers => true) do |row|
+CSV.foreach(file_path, headers: true) do |row|
   statistic = Statistic.new
   statistic.player_id = row[0]
   statistic.year_id = row[1]

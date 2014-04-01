@@ -3,11 +3,13 @@ require 'logger'
 
 load 'models/player.rb'
 load 'models/statistic.rb'
+load 'lib/batter_up.rb'
 
-ActiveRecord::Base.establish_connection :adapter  => 'sqlite3', :database => 'db/batter_up_test.db'
+environment = 'test'
+dbconfig = YAML.load(File.read('config/database.yml'))
+ActiveRecord::Base.establish_connection dbconfig[environment]
 
 I18n.enforce_available_locales = false
-
 
 ActiveSupport::LogSubscriber.colorize_logging = false
 
@@ -39,7 +41,7 @@ RSpec.configure do |config|
   config.around(:each) do |test|
     ActiveRecord::Base.transaction do
       test.run
-      raise ActiveRecord::Rollback
+      fail ActiveRecord::Rollback
     end
   end
 
