@@ -1,4 +1,9 @@
+load 'config/ar.rb'
+require 'csv'
+
 file_path = 'data/Master-small.csv'
+
+p 'Importing players...'
 
 CSV.foreach(file_path, headers: true) do |row|
   player = Player.new
@@ -10,6 +15,8 @@ CSV.foreach(file_path, headers: true) do |row|
 end
 
 file_path = 'data/Batting-07-12.csv'
+
+p 'Importing staticstics...'
 
 CSV.foreach(file_path, headers: true) do |row|
   statistic = Statistic.new

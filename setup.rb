@@ -1,5 +1,9 @@
 require 'csv'
 
+if ARGV[0] == '--init'
+  load 'config/ar.rb'
+end
+
 unless ActiveRecord::Base.connection.table_exists? 'players'
   ActiveRecord::Schema.define do
     create_table :players do |t|
@@ -11,6 +15,8 @@ unless ActiveRecord::Base.connection.table_exists? 'players'
 
     add_index :players, :player_id
   end
+else
+  p 'players table already exists'
 end
 
 unless ActiveRecord::Base.connection.table_exists? 'statistics'
@@ -34,4 +40,6 @@ unless ActiveRecord::Base.connection.table_exists? 'statistics'
 
     add_index :statistics, :player_id
   end
+else
+  p 'statistics table already exists'
 end
