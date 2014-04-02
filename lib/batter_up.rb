@@ -26,7 +26,9 @@ class BatterUp
     @players ||= Player
       .find_players_by_at_bat_and_period(TRIPLE_CROWN_AT_BAT_MIN, year, year)
 
-    league_players = get_league_players(league, year)
+    league_players = @players.select do |player|
+      player.played_in_league?(league, year)
+    end
 
     set_triple_crown_winner_variables(league_players, year)
 
@@ -46,10 +48,6 @@ class BatterUp
       Player.most_home_runs(players, year).try(:player_id)
     @rbi_player_id =
       Player.most_rbi(players, year).try(:player_id)
-  end
-
-  def get_league_players(league, year)
-    @players.select { |player| player.played_in_league?(league, year) }
   end
 
   def get_triple_crown_winner_name(id_1, id_2, id_3)
