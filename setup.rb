@@ -1,10 +1,10 @@
 require 'csv'
 
-if ARGV[0] == '--init'
-  load 'config/ar.rb'
-end
+load 'config/ar.rb' if ARGV[0] == '--init'
 
-unless ActiveRecord::Base.connection.table_exists? 'players'
+if ActiveRecord::Base.connection.table_exists? 'players'
+  p 'players table already exists'
+else
   ActiveRecord::Schema.define do
     create_table :players do |t|
       t.column :player_id, :string
@@ -15,11 +15,11 @@ unless ActiveRecord::Base.connection.table_exists? 'players'
 
     add_index :players, :player_id
   end
-else
-  p 'players table already exists'
 end
 
-unless ActiveRecord::Base.connection.table_exists? 'statistics'
+if ActiveRecord::Base.connection.table_exists? 'statistics'
+  p 'statistics table already exists'
+else
   ActiveRecord::Schema.define do
     create_table :statistics do |t|
       t.column :player_id, :string
@@ -40,6 +40,4 @@ unless ActiveRecord::Base.connection.table_exists? 'statistics'
 
     add_index :statistics, :player_id
   end
-else
-  p 'statistics table already exists'
 end

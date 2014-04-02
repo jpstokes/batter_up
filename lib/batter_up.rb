@@ -6,7 +6,7 @@ class BatterUp
     # most improved batting average
     results = []
     Player
-      .find_players_by_at_bat_and_period(at_bat_min, from, to).each do |player|
+    .find_players_by_at_bat_and_period(at_bat_min, from, to).each do |player|
       results << "Name: #{player.first_name} #{player.last_name}, " \
         "Batting Avg: #{player.batting_average(from, to)}"
     end
@@ -23,23 +23,41 @@ class BatterUp
   end
 
   def triple_crown_winner(league, year)
-    @players ||= Player.find_players_by_at_bat_and_period(TRIPLE_CROWN_AT_BAT_MIN, year, year)
+    @players ||= Player
+      .find_players_by_at_bat_and_period(TRIPLE_CROWN_AT_BAT_MIN, year, year)
 
-    league_players = @players.select { |player| player.played_in_league?(league, year) }
-    batting_avg_player_id = Player.highest_batting_average(league_players, year).try(:player_id)
-    home_run_player_id = Player.most_home_runs(league_players, year).try(:player_id)
-    rbi_player_id = Player.most_rbi(league_players, year).try(:player_id)
+    league_players = get_league_players(league, year)
 
-    name =
-      if !batting_avg_player_id.nil? && batting_avg_player_id == home_run_player_id &&
-        batting_avg_player_id == rbi_player_id
+    set_triple_crown_winner_variables(league_players, year)
 
-        player = Player.find_by_player_id(batting_avg_player_id)
-        "#{player.first_name} #{player.last_name}"
-      else
-        '(No winner)'
-      end
+    name = get_triple_crown_winner_name(@batting_avg_player_id,
+                                        @home_run_player_id,
+                                        @rbi_player_id)
 
     "#{league} Triple Crown Winner for #{year}: #{name}"
+  end
+
+  private
+
+  def set_triple_crown_winner_variables(players, year)
+    @batting_avg_player_id =
+      Player.highest_batting_average(players, year).try(:player_id)
+    @home_run_player_id =
+      Player.most_home_runs(players, year).try(:player_id)
+    @rbi_player_id =
+      Player.most_rbi(players, year).try(:player_id)
+  end
+
+  def get_league_players(league, year)
+    @players.select { |player| player.played_in_league?(league, year) }
+  end
+
+  def get_triple_crown_winner_name(id_1, id_2, id_3)
+    if !id_1.nil? && id_1 == id_2 && id_1 == id_3
+      player = Player.find_by_player_id(id_1)
+      "#{player.first_name} #{player.last_name}"
+    else
+      '(No winner)'
+    end
   end
 end
